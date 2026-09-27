@@ -271,14 +271,17 @@ export function SubmitForm() {
           ) : (
             <p className="rounded-xl bg-mint-100 px-4 py-3 text-lg">
               Submitting as <strong>{profile.name}</strong>
-              {profile.teamName && <> · {profile.teamName}</>} ·{" "}
-              <button
-                type="button"
-                onClick={() => setEditingProfile(true)}
-                className="tap -my-3 font-semibold text-grape-700 underline underline-offset-4"
-              >
-                edit
-              </button>
+              {profile.teamName && <> · {profile.teamName}</>}{" "}
+              <span className="whitespace-nowrap">
+                ·{" "}
+                <button
+                  type="button"
+                  onClick={() => setEditingProfile(true)}
+                  className="tap -my-3 font-semibold text-grape-700 underline underline-offset-4"
+                >
+                  edit
+                </button>
+              </span>
             </p>
           )}
 

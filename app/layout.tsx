@@ -24,7 +24,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${bebas.variable} ${kaushan.variable} antialiased`}>
+    <html
+      lang="en"
+      // The intro splash script may add "intro-seen" before hydration.
+      suppressHydrationWarning
+      className={`${inter.variable} ${bebas.variable} ${kaushan.variable} antialiased`}
+    >
       <body className="flex flex-col">
         <QueueRunner />
         <TestModeBanner />
