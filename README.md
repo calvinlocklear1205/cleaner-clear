@@ -21,6 +21,12 @@ npm run dev
 - **Local dev:** put them in `.env.local` at the repo root (next to `package.json`). Start from `cp .env.example .env.local`. The file is gitignored — never commit it. Restart `npm run dev` after editing.
 - **Vercel:** Project → Settings → Environment Variables. Add the same keys for Production (and Preview if you use preview deploys), then redeploy.
 
+## Testing before event day
+
+The submit form only appears between `opensAt` and `closesAt` in `config/event.ts`. To try it any other time, set `SUBMISSIONS_OPEN=always` in `.env.local` and restart `npm run dev`. Test entries go into your real Supabase project; delete them in the Table Editor (and Storage) afterwards.
+
+To test on your phone: run `npm run dev -- -H 0.0.0.0` and open `http://<your-computer's-IP>:3000` on the same Wi-Fi. Location won't work over plain http. That's expected, and the form works without it.
+
 ## Yearly re-skin
 
 - `config/event.ts` — name, dates, optional zones, categories.

@@ -36,6 +36,12 @@ export type EventConfig = {
    * or the SUBMISSIONS_OPEN env var. Leave `true` to defer to the env var.
    */
   submissionsOpen: boolean;
+  /**
+   * Minutes after closesAt that the API still accepts entries, so photos
+   * snapped before close but stuck in a bad-signal queue still make it in.
+   * The form itself closes at closesAt.
+   */
+  uploadGraceMinutes: number;
   /** Optional manual location labels. Empty = no zone picker. */
   zones: readonly string[];
   categories: readonly Category[];
@@ -49,6 +55,7 @@ export const event: EventConfig = {
   opensAt: "2026-10-03T07:00:00-06:00",
   closesAt: "2026-10-03T15:00:00-06:00",
   submissionsOpen: true,
+  uploadGraceMinutes: 120,
   zones: [],
   // TODO: prizes and runners-up per category are still TBD.
   categories: [
@@ -73,18 +80,34 @@ export function isValidZone(zone: string): boolean {
 /**
  * Whether submissions are accepted right now. Closed if the config kill
  * switch is off, if SUBMISSIONS_OPEN=false (server-side env), or if `now` is
- * outside [opensAt, closesAt).
+ * outside [opensAt, closesAt). SUBMISSIONS_OPEN=always ignores the window
+ * (for testing).
  *
  * Call this on the server; the env var is not exposed to the browser.
  */
 export function isSubmissionsOpen(now: Date = new Date()): boolean {
+  return isWithinWindow(now, 0);
+}
+
+/**
+ * Like isSubmissionsOpen, but keeps accepting for uploadGraceMinutes after
+ * close so queued entries can drain. Used by the submission API routes.
+ */
+export function isAcceptingUploads(now: Date = new Date()): boolean {
+  return isWithinWindow(now, event.uploadGraceMinutes);
+}
+
+function isWithinWindow(now: Date, graceMinutes: number): boolean {
   if (!event.submissionsOpen) return false;
-  if (process.env.SUBMISSIONS_OPEN?.trim().toLowerCase() === "false") return false;
+  const override = process.env.SUBMISSIONS_OPEN?.trim().toLowerCase();
+  if (override === "false") return false;
+  // For testing before event day. Never leave this on in production.
+  if (override === "always") return true;
   const opens = Date.parse(event.opensAt);
   const closes = Date.parse(event.closesAt);
   if (Number.isNaN(opens) || Number.isNaN(closes)) {
     throw new Error("config/event.ts: opensAt/closesAt must be valid ISO 8601 dates");
   }
   const t = now.getTime();
-  return t >= opens && t < closes;
+  return t >= opens && t < closes + graceMinutes * 60_000;
 }
