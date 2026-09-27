@@ -119,7 +119,7 @@ export function Detail({ id }: { id: string }) {
         <Fact label="Category">{category ? `${category.emoji} ${category.label}` : item.categoryId}</Fact>
         {item.weightLbs !== null && <Fact label="Weight">{item.weightLbs} lbs</Fact>}
         {item.note && <Fact label="Note">{item.note}</Fact>}
-        {item.teamName && <Fact label="Team">{item.teamName}</Fact>}
+        {!item.contact && item.teamName && <Fact label="Team">{item.teamName}</Fact>}
         {(mapHref || item.zone) && (
           <Fact label="Where">
             {item.zone && <>Zone {item.zone} </>}
@@ -133,7 +133,7 @@ export function Detail({ id }: { id: string }) {
         <Fact label="Time">
           {new Date(item.createdAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
         </Fact>
-        <Fact label="Photo OK for social">{item.photoConsent ? "Yes" : "No"}</Fact>
+        <Fact label="Social OK">{item.photoConsent ? "Yes" : "No"}</Fact>
       </dl>
 
       {/* Awards */}
@@ -204,41 +204,70 @@ export function Detail({ id }: { id: string }) {
 
 function Contact({ detail }: { detail: SubmissionDetail }) {
   const c = detail.contact!;
+  const purged = !c.name && !c.phone;
   return (
-    <section className="outlined rounded-2xl bg-mint-100 p-3">
-      <h2 className="font-display text-2xl tracking-wide">Submitted by</h2>
-      <PersonLinks label={detail.isMinor ? "Entrant (minor)" : "Entrant"} name={c.name} phone={c.phone} />
-      {detail.teamName && <p className="text-base text-river-900">Team: {detail.teamName}</p>}
-      {detail.isMinor && <PersonLinks label="Parent/guardian" name={c.guardianName} phone={c.guardianPhone} />}
-      {!c.phone && <p className="text-base">Contact info has been purged.</p>}
+    <section className="outlined rounded-2xl bg-white p-4">
+      <h2 className="text-sm font-bold tracking-wide text-river-900 uppercase">Submitted by</h2>
+      {purged ? (
+        <p className="mt-1 text-base">Contact info has been purged.</p>
+      ) : (
+        <div className="mt-2 flex flex-col divide-y-2 divide-mint-200">
+          <Person
+            label={detail.isMinor ? "Under 18" : null}
+            name={c.name}
+            phone={c.phone}
+            sub={detail.teamName ? `Team ${detail.teamName}` : null}
+          />
+          {detail.isMinor && (c.guardianName || c.guardianPhone) && (
+            <Person label="Parent / guardian" name={c.guardianName} phone={c.guardianPhone} sub={null} />
+          )}
+        </div>
+      )}
     </section>
   );
 }
 
-function PersonLinks({ label, name, phone }: { label: string; name: string | null; phone: string | null }) {
-  if (!name && !phone) return null;
+/** One person per row: details stacked on the left, round Call / Text buttons on the right. */
+function Person({
+  label,
+  name,
+  phone,
+  sub,
+}: {
+  label: string | null;
+  name: string | null;
+  phone: string | null;
+  sub: string | null;
+}) {
   return (
-    <div className="mt-2">
-      <p className="text-base text-river-900">{label}</p>
-      <p className="text-xl font-semibold">{name}</p>
+    <div className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+      <div className="min-w-0 flex-1">
+        {label && (
+          <span className="mb-1 inline-block rounded-full bg-fish-500 px-2 text-xs font-bold tracking-wide uppercase">
+            {label}
+          </span>
+        )}
+        <p className="truncate text-xl leading-tight font-bold">{name ?? "—"}</p>
+        {phone && <p className="text-base whitespace-nowrap text-river-900">{formatPhone(phone)}</p>}
+        {sub && <p className="truncate text-base text-river-900">{sub}</p>}
+      </div>
       {phone && (
-        <>
-          <p className="text-lg">{formatPhone(phone)}</p>
-          <div className="mt-1 grid grid-cols-2 gap-2">
-            <a
-              href={`tel:${phone}`}
-              className="outlined tap flex items-center justify-center rounded-xl bg-white px-4 font-semibold"
-            >
-              📞 Call
-            </a>
-            <a
-              href={`sms:${phone}`}
-              className="outlined tap flex items-center justify-center rounded-xl bg-white px-4 font-semibold"
-            >
-              💬 Text
-            </a>
-          </div>
-        </>
+        <div className="flex shrink-0 gap-2">
+          <a
+            href={`tel:${phone}`}
+            aria-label={`Call ${name ?? phone}`}
+            className="flex size-12 items-center justify-center rounded-full border-3 border-ink bg-river-700 text-xl"
+          >
+            📞
+          </a>
+          <a
+            href={`sms:${phone}`}
+            aria-label={`Text ${name ?? phone}`}
+            className="flex size-12 items-center justify-center rounded-full border-3 border-ink bg-white text-xl"
+          >
+            💬
+          </a>
+        </div>
       )}
     </div>
   );
