@@ -22,6 +22,7 @@ npm run dev
 |---|---|---|
 | `/` | Volunteers | Snap → category → send. Closed screen outside the event window. |
 | `/mine` | Volunteers | This phone's entries, codes and upload status. |
+| `/a/<code>` | Anyone with the link | A volunteer's shared "trash album": photos, stats, wins. Created from "Mine". |
 | `/hazard` | Volunteers | "Don't touch it" + prefilled text to the safety lead. |
 | `/judge` | Judges (passcode) | Photo feed by category, scoring, hide, awards, prize-tent code lookup. |
 | `/judge/leaderboard` | Judges | Ranked per category, totals, CSV download. |

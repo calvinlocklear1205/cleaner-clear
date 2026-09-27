@@ -13,7 +13,7 @@
 
 Either:
 
-- **SQL editor (simplest):** paste `supabase/migrations/20260927000000_init.sql` into Dashboard → SQL Editor and run it. It is safe to re-run only on an empty project (the `create table` statements are not `if not exists`).
+- **SQL editor (simplest):** paste each file in `supabase/migrations/` into Dashboard → SQL Editor and run them in filename order (`…_init.sql`, then `…_albums.sql`). It is safe to re-run only on an empty project (the `create table` statements are not `if not exists`).
 - **Supabase CLI:**
   ```sh
   npx supabase login

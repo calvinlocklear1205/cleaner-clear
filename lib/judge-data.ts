@@ -200,6 +200,8 @@ export async function deleteSubmissions(ids?: string[]): Promise<number> {
   if (!ids) {
     const { error: hazardError } = await db.from("hazards").delete().eq("event_year", event.year);
     if (hazardError) throw hazardError;
+    const { error: albumError } = await db.from("albums").delete().eq("event_year", event.year);
+    if (albumError) throw albumError;
   }
   return data.length;
 }
