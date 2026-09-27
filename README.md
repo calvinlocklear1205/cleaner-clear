@@ -27,6 +27,20 @@ npm run dev
 | `/judge/leaderboard` | Judges | Ranked per category, totals, CSV download. |
 | `/wall?key=<JUDGE_PASSCODE>` | HQ tent TV | Full-screen slideshow (category + team name only). Click for full screen. |
 
+## Team testing on the live site
+
+1. In Vercel, set `SUBMISSIONS_OPEN=always` and redeploy. Every page shows a striped **TEST MODE** banner.
+2. Share the site link with the team (and `/judge` + the passcode with judges). Test entries go into the real database.
+3. When testing is done, wipe the test data from your computer:
+   ```sh
+   npm run reset-test-data          # dry run: shows counts, deletes nothing
+   npm run reset-test-data -- --yes # deletes this year's submissions, votes, hazards and photos
+   ```
+   Testers' phones drop their old entries from "Mine" automatically the next time they open it.
+4. Set `SUBMISSIONS_OPEN=true` in Vercel and redeploy. The banner disappears and the form opens only during the event window.
+
+**Never run the reset after real submissions start.**
+
 ## Event-day runbook
 
 - **Before:** set `SUBMISSIONS_OPEN=true` in Vercel, check dates in `config/event.ts`, print QR codes pointing at the site.

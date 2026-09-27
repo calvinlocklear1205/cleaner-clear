@@ -97,6 +97,11 @@ export function isAcceptingUploads(now: Date = new Date()): boolean {
   return isWithinWindow(now, event.uploadGraceMinutes);
 }
 
+/** True when SUBMISSIONS_OPEN=always — shows a TEST MODE banner so it's never left on by accident. */
+export function isTestMode(): boolean {
+  return process.env.SUBMISSIONS_OPEN?.trim().toLowerCase() === "always";
+}
+
 function isWithinWindow(now: Date, graceMinutes: number): boolean {
   if (!event.submissionsOpen) return false;
   const override = process.env.SUBMISSIONS_OPEN?.trim().toLowerCase();
