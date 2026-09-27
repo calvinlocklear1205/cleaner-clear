@@ -59,7 +59,7 @@ for (let i = 0; i < files.length; i += 100) {
   if (error) throw error;
 }
 // votes cascade from submissions.
-for (const table of ["submissions", "hazards"]) {
+for (const table of ["submissions", "hazards", "albums"]) {
   const { error } = await db.from(table).delete().eq("event_year", year);
   if (error) throw error;
 }

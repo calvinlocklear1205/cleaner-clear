@@ -7,6 +7,7 @@ import { listEntries, removeEntry, retryNow, type EntryStatus, type QueueEntry }
 import { getDeviceId } from "@/lib/client/storage";
 import { thumbUrl, useQueueEntries } from "@/lib/client/use-queue";
 import type { MineItem } from "@/app/api/submissions/mine/route";
+import { ShareAlbum } from "./share-album";
 
 type Row = {
   id: string;
@@ -51,6 +52,7 @@ export function MineList() {
             : `No signal. ${waiting} ${waiting === 1 ? "entry is" : "entries are"} saved and will send automatically.`}
         </p>
       )}
+      {rows.some((r) => r.status === "sent") && <ShareAlbum />}
       <ul className="flex flex-col gap-3">
         {rows.map((row) => (
           <MineRow key={row.id} row={row} online={online} />

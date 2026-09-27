@@ -539,6 +539,9 @@ function Confirmation({ id, onSnapAnother }: { id: string; onSnapAnother: () => 
             <p className="font-display text-8xl leading-none tracking-wider text-grape-700">#{entry.code}</p>
           </div>
           <p className="text-xl font-semibold">Show this at the prize tent if you win.</p>
+          <Link href="/mine#share" className="tap flex items-center font-semibold text-grape-700 underline">
+            📤 Share your trash album
+          </Link>
         </>
       ) : status === "failed" ? (
         <div className="outlined w-full rounded-3xl bg-white px-6 py-8">
