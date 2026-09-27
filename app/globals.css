@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/*
+ * 2026 palette, pulled from the "A Cleaner Clear — 7th Annual" badge.
+ * Update these tokens each year to re-skin the app.
+ */
+@theme {
+  --color-river-950: #0c2a1c; /* deep ring shadow — page base */
+  --color-river-900: #133f2a;
+  --color-river-700: #1e6b47; /* badge ring green */
+  --color-river-500: #2f9464;
+  --color-mint-100: #e9fcf1; /* badge background, light */
+  --color-mint-200: #d4f7e4; /* badge background */
+  --color-mint-300: #b3eecd; /* badge wave lines */
+  --color-grape-900: #3d1a5c;
+  --color-grape-700: #5b2a86; /* "RIVER CLEANUP" / "7TH ANNUAL" purple */
+  --color-grape-500: #8a4fc0; /* script-logo purple */
+  --color-grape-200: #e6d6f5; /* script-logo highlight */
+  --color-grabber-500: #3b9bdb; /* litter-grabber blue */
+  --color-grabber-700: #1f6fa8;
+  --color-fish-500: #f28c1e; /* fish orange — primary CTA */
+  --color-fish-600: #d9730b;
+  --color-lip-400: #f06a9a; /* fish-lip pink */
+  --color-ink: #111111; /* heavy cartoon outline */
+
+  --font-display: var(--font-bebas), "Arial Narrow", sans-serif;
+  --font-script: var(--font-kaushan), cursive;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  background: var(--color-mint-200);
+  color: var(--color-ink);
+  /* Sun-readable minimum. */
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+@layer components {
+  /* Thick cartoon outline + offset shadow, like the badge artwork. */
+  .outlined {
+    border: 3px solid var(--color-ink);
+    box-shadow: 4px 4px 0 var(--color-ink);
+  }
+
+  /* ≥48px tap targets for gloved / wet hands. */
+  .tap {
+    min-height: 3rem;
+    min-width: 3rem;
+  }
+}
