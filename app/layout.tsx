@@ -8,7 +8,7 @@ const bebas = Bebas_Neue({ variable: "--font-bebas", weight: "400", subsets: ["l
 const kaushan = Kaushan_Script({ variable: "--font-kaushan", weight: "400", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: `${event.name} ${event.tagline} ${event.year}`,
+  title: `${event.name} ${event.year}`,
   description: "Snap what you pull out of the river and enter the contest.",
   appleWebApp: { capable: true, title: event.name, statusBarStyle: "default" },
 };

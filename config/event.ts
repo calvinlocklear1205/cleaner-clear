@@ -2,11 +2,13 @@
  * Single source of truth for the event. Edit this file each year — there is
  * no admin UI by design (see SPEC.md "Non-goals").
  *
- * TODO before the event:
- *   - opensAt / closesAt: set to the real event date and hours (Denver time).
- *   - zones: match the physical flags/signs on site.
- *   - categories: finalize with organizers (ids are stored in the DB, so
- *     don't rename an id once submissions exist).
+ * Notes:
+ *   - opensAt / closesAt are Denver time. The window is padded on both sides
+ *     of the official 9am–12pm so early birds and stragglers can still submit.
+ *   - zones: leave empty to skip zone entirely (GPS only). Add labels, e.g.
+ *     ["A", "B", "C"], to show a manual zone picker when GPS is unavailable.
+ *   - categories: ids are stored in the DB — don't rename an id once
+ *     submissions exist.
  */
 
 export type Category = {
@@ -20,9 +22,10 @@ export type Category = {
 };
 
 export type EventConfig = {
+  /** App name shown in the title bar and headers. */
   name: string;
-  tagline: string;
-  edition: string;
+  /** The cleanup this contest is part of. */
+  cleanup: string;
   year: number;
   /** ISO 8601 with offset. Submissions open at this instant. */
   opensAt: string;
@@ -33,20 +36,21 @@ export type EventConfig = {
    * or the SUBMISSIONS_OPEN env var. Leave `true` to defer to the env var.
    */
   submissionsOpen: boolean;
+  /** Optional manual location labels. Empty = no zone picker. */
   zones: readonly string[];
   categories: readonly Category[];
 };
 
 export const event: EventConfig = {
-  name: "A Cleaner Clear",
-  tagline: "River Cleanup",
-  edition: "7th Annual",
+  name: "Cleaner Clear Photo Contest",
+  cleanup: "7th Annual Clear Creek Cleanup",
   year: 2026,
-  // PLACEHOLDER dates — replace with the real event day.
-  opensAt: "2026-10-17T08:00:00-06:00",
-  closesAt: "2026-10-17T13:00:00-06:00",
+  // Official hours: Sat Oct 3, 9am–12pm at Engineer Lake Parking Lot.
+  opensAt: "2026-10-03T07:00:00-06:00",
+  closesAt: "2026-10-03T15:00:00-06:00",
   submissionsOpen: true,
-  zones: ["A", "B", "C", "D", "E", "F"],
+  zones: [],
+  // TODO: prizes and runners-up per category are still TBD.
   categories: [
     { id: "weirdest", label: "Weirdest Find", emoji: "🤯", blurb: "The 'how did THIS get here?' award" },
     { id: "heaviest", label: "Heaviest Haul", emoji: "🏋️", blurb: "Weigh it at a scale station", requiresWeight: true },
@@ -59,6 +63,8 @@ export const event: EventConfig = {
 export function getCategory(id: string): Category | undefined {
   return event.categories.find((c) => c.id === id);
 }
+
+export const zonesEnabled = event.zones.length > 0;
 
 export function isValidZone(zone: string): boolean {
   return event.zones.includes(zone);
