@@ -3,11 +3,11 @@
 ## 1. Create the project
 
 1. Create a new project at <https://supabase.com/dashboard>. Pick region **West US (Oregon)** or **Central US** — closest to Denver.
-2. From **Project Settings → API**, copy:
-   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-   - **service_role** secret → `SUPABASE_SERVICE_ROLE_KEY` (server only)
+2. Copy two values into `.env.local`:
+   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`. Click the green **Connect** button at the top of the dashboard, or go to Settings → Data API. It looks like `https://<project-id>.supabase.co`.
+   - **Secret key** → `SUPABASE_SERVICE_ROLE_KEY` (server only). Go to Settings → API Keys → **Secret keys**, and copy the `default` key (starts with `sb_secret_`). The legacy `service_role` JWT also works.
 
-   The `anon` key is **not used** by this app. The browser never talks to Supabase except to PUT a photo to a pre-signed upload URL.
+   The publishable / `anon` key is **not used** by this app. The browser never talks to Supabase except to PUT a photo to a pre-signed upload URL.
 
 ## 2. Run the migration
 
@@ -36,11 +36,11 @@ select count(*) from pg_policies where schemaname = 'public';
 -- 0
 ```
 
-And from a terminal, the anon key must get nothing back:
+And from a terminal, the publishable key must get nothing back:
 
 ```sh
 curl "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/submissions?select=*" \
-  -H "apikey: $ANON_KEY" -H "Authorization: Bearer $ANON_KEY"
+  -H "apikey: $PUBLISHABLE_KEY"
 # → permission denied (42501)
 ```
 
