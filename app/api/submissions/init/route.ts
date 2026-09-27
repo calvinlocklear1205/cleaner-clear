@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { event, isAcceptingUploads } from "@/config/event";
 import { jsonError, readJson } from "@/lib/api";
 import { generateCode } from "@/lib/codes";
-import { photoPath, validateSubmission, type InitResponse, type SubmissionInput } from "@/lib/submission";
+import { photoPath, thumbPath, validateSubmission, type InitResponse, type SubmissionInput } from "@/lib/submission";
 import { SUBMISSIONS_BUCKET, supabaseAdmin } from "@/lib/supabase/server";
 
 /** Max new submissions per device per minute. Generous: it only stops runaway loops. */
@@ -58,12 +58,17 @@ export async function POST(request: Request) {
   }
 
   const path = photoPath(input.id);
-  const { data: signed, error: signError } = await db.storage
-    .from(SUBMISSIONS_BUCKET)
-    .createSignedUploadUrl(path, { upsert: true });
-  if (signError || !signed) return serverError("sign-upload", signError);
+  const bucket = db.storage.from(SUBMISSIONS_BUCKET);
+  const [photo, thumb] = await Promise.all([
+    bucket.createSignedUploadUrl(path, { upsert: true }),
+    bucket.createSignedUploadUrl(thumbPath(input.id), { upsert: true }),
+  ]);
+  if (photo.error || !photo.data) return serverError("sign-upload", photo.error);
 
-  return ok({ code, upload: { signedUrl: signed.signedUrl, path } });
+  return ok({
+    code,
+    upload: { signedUrl: photo.data.signedUrl, path, thumbSignedUrl: thumb.data?.signedUrl ?? null },
+  });
 }
 
 async function insertWithUniqueCode(

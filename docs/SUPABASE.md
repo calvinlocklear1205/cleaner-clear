@@ -65,7 +65,8 @@ The migration inserts the bucket for you. If you'd rather click through the dash
 
 ```
 submissions/                      ← bucket
-  2026/<submission_uuid>.jpg      ← contest photos
+  2026/<submission_uuid>.jpg      ← contest photos (1600px)
+  2026/<submission_uuid>_thumb.jpg ← 480px thumbnail for the judges' grid (optional)
   2026/hazards/<hazard_uuid>.jpg  ← hazard photos (P1)
 ```
 
@@ -77,5 +78,5 @@ Supabase Storage accepts browser `PUT`s from any origin for signed upload URLs; 
 
 ## 4. After the event
 
-- Run `scripts/purge-contacts.sql` (added in Phase 5) once prizes are awarded.
+- Run `scripts/purge-contacts.sql` once prizes are awarded (edit the year first).
 - Export anything the sponsor/city needs via `/api/judge/export.csv` first.

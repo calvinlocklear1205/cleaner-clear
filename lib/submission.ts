@@ -32,7 +32,7 @@ export type SubmissionInput = {
 export type InitResponse = {
   code: string;
   /** Null when the photo is already uploaded and completed (retry after success). */
-  upload: { signedUrl: string; path: string } | null;
+  upload: { signedUrl: string; path: string; thumbSignedUrl: string | null } | null;
 };
 
 export type CompleteResponse = { code: string };
@@ -147,4 +147,9 @@ export function validateSubmission(
 /** Storage object path for a submission photo. */
 export function photoPath(id: string): string {
   return `${event.year}/${id}.jpg`;
+}
+
+/** Small copy for the judges' grid; optional (judges fall back to the full photo). */
+export function thumbPath(id: string): string {
+  return `${event.year}/${id}_thumb.jpg`;
 }

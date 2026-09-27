@@ -57,8 +57,8 @@ export function SubmitForm() {
     setFormError("");
     try {
       const blob = await compressImage(file);
-      // Small copy for the "My submissions" list; not worth failing over.
-      const thumb = await compressImage(blob, { maxEdge: 320, quality: 0.6, maxBytes: 40_000 }).catch(() => null);
+      // Small copy for "My submissions" and the judges' grid; not worth failing over.
+      const thumb = await compressImage(blob, { maxEdge: 480, quality: 0.6, maxBytes: 60_000 }).catch(() => null);
       setPhoto({ blob, thumb, url: URL.createObjectURL(blob) });
       setErrors((prev) => ({ ...prev, id: undefined }));
       locate(setGeo); // refresh position for this find

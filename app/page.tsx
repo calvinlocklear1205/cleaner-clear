@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { event, isSubmissionsOpen } from "@/config/event";
+import { HazardLink } from "./hazard-link";
 import { MineLink } from "./mine-link";
 import { SubmitForm } from "./submit-form";
 
@@ -32,6 +33,7 @@ export default function Home() {
       </header>
 
       {open ? <SubmitForm /> : <Closed />}
+      <HazardLink />
     </main>
   );
 }

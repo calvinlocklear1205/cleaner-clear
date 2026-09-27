@@ -21,6 +21,7 @@ export class SubmitError extends Error {
 export async function uploadSubmission(
   input: SubmissionInput,
   photo: Blob,
+  thumb: Blob | null = null,
   onStage: (stage: UploadStage) => void = () => {},
 ): Promise<{ code: string }> {
   onStage("starting");
@@ -30,11 +31,7 @@ export async function uploadSubmission(
     onStage("uploading");
     let res: Response;
     try {
-      res = await fetch(init.upload.signedUrl, {
-        method: "PUT",
-        headers: { "content-type": "image/jpeg", "x-upsert": "true", "cache-control": "max-age=3600" },
-        body: photo,
-      });
+      res = await putJpeg(init.upload.signedUrl, photo);
     } catch {
       throw new SubmitError("Lost signal while uploading the photo.", true);
     }
@@ -44,6 +41,11 @@ export async function uploadSubmission(
         res.status >= 500 || res.status === 408 || res.status === 429,
       );
 
+    // Best effort: judges fall back to the full photo if the thumbnail is missing.
+    if (thumb && init.upload.thumbSignedUrl) {
+      await putJpeg(init.upload.thumbSignedUrl, thumb).catch(() => {});
+    }
+
     onStage("finishing");
   }
 
@@ -52,6 +54,14 @@ export async function uploadSubmission(
     deviceId: input.deviceId,
   });
   return { code: done.code };
+}
+
+function putJpeg(signedUrl: string, body: Blob): Promise<Response> {
+  return fetch(signedUrl, {
+    method: "PUT",
+    headers: { "content-type": "image/jpeg", "x-upsert": "true", "cache-control": "max-age=3600" },
+    body,
+  });
 }
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {

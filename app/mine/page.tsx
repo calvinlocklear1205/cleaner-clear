@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HazardLink } from "../hazard-link";
 import { MineList } from "./mine-list";
 
 export const metadata: Metadata = { title: "My submissions" };
@@ -18,6 +19,7 @@ export default function MinePage() {
         <h1 className="font-display text-4xl leading-none tracking-wide text-grape-700">My submissions</h1>
       </header>
       <MineList />
+      <HazardLink />
     </main>
   );
 }

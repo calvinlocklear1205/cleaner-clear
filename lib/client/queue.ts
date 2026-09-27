@@ -261,7 +261,11 @@ async function drain(): Promise<void> {
 async function attempt(entry: QueueEntry): Promise<void> {
   await update(entry.id, { status: "uploading", error: null });
   try {
-    const { code } = await uploadSubmission(entry.input, toBlob(entry.photo!));
+    const { code } = await uploadSubmission(
+      entry.input,
+      toBlob(entry.photo!),
+      entry.thumb ? toBlob(entry.thumb) : null,
+    );
     // Confirmed by the server: drop the full photo, keep the thumbnail.
     await update(entry.id, { status: "sent", code, sentAt: Date.now(), photo: null, error: null });
   } catch (err) {
