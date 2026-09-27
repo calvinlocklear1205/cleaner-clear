@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getCategory } from "@/config/event";
-import { removeEntry, retryNow, type EntryStatus, type QueueEntry } from "@/lib/client/queue";
+import { listEntries, removeEntry, retryNow, type EntryStatus, type QueueEntry } from "@/lib/client/queue";
 import { getDeviceId } from "@/lib/client/storage";
 import { thumbUrl, useQueueEntries } from "@/lib/client/use-queue";
 import type { MineItem } from "@/app/api/submissions/mine/route";
@@ -186,7 +186,15 @@ function useServerItems(): MineItem[] {
         body: JSON.stringify({ deviceId: getDeviceId() }),
       })
         .then((r) => (r.ok ? (r.json() as Promise<MineItem[]>) : null))
-        .then((data) => data && setItems(data))
+        .then(async (data) => {
+          if (!data) return;
+          setItems(data);
+          // A "sent" entry the server no longer has was wiped (test-data reset): forget it.
+          const known = new Set(data.map((d) => d.id));
+          for (const e of await listEntries()) {
+            if (e.status === "sent" && !known.has(e.id)) await removeEntry(e.id);
+          }
+        })
         .catch(() => {}); // offline: local entries still show
     load();
     window.addEventListener("online", load);

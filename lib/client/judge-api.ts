@@ -43,6 +43,14 @@ export function updateSubmission(id: string, patch: { hidden?: boolean; winnerRa
   return call(`/api/judge/submissions/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
 }
 
+export function deleteEntry(id: string) {
+  return call(`/api/judge/submissions/${id}`, { method: "DELETE" });
+}
+
+export function deleteEverything() {
+  return call<{ deleted: number }>("/api/judge/reset", { method: "POST", body: JSON.stringify({ confirm: "DELETE" }) });
+}
+
 export async function lookupCode(code: string): Promise<string> {
   const { id } = await call<{ id: string }>(`/api/judge/lookup?code=${encodeURIComponent(code)}`);
   return id;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { jsonError, readJson } from "@/lib/api";
-import { loadDetail } from "@/lib/judge-data";
+import { deleteSubmissions, loadDetail } from "@/lib/judge-data";
 import { currentJudge, unauthorized } from "@/lib/judge-server";
 import { isUuid } from "@/lib/submission";
 import { supabaseAdmin } from "@/lib/supabase/server";
@@ -63,6 +63,22 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/judge/subm
 
   console.info(`[judge] ${judge} updated ${id}`, patch);
   return NextResponse.json({ ok: true });
+}
+
+/** Permanently deletes the entry and its photos (e.g. a test entry). */
+export async function DELETE(_request: Request, ctx: RouteContext<"/api/judge/submissions/[id]">) {
+  const judge = await currentJudge();
+  if (!judge) return unauthorized();
+  const { id } = await ctx.params;
+  if (!isUuid(id)) return jsonError(404, "Not found.");
+  try {
+    const deleted = await deleteSubmissions([id]);
+    if (!deleted) return jsonError(404, "Not found.");
+    console.info(`[judge] ${judge} deleted ${id}`);
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    return fail("delete", e);
+  }
 }
 
 function fail(step: string, error: unknown) {

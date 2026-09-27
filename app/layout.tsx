@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Inter, Kaushan_Script } from "next/font/google";
 import { event } from "@/config/event";
 import { QueueRunner } from "./queue-runner";
+import { TestModeBanner } from "./test-mode-banner";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${inter.variable} ${bebas.variable} ${kaushan.variable} antialiased`}>
       <body className="flex flex-col">
         <QueueRunner />
+        <TestModeBanner />
         {children}
       </body>
     </html>

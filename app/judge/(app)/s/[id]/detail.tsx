@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { getCategory } from "@/config/event";
-import { fetchDetail, updateSubmission, vote } from "@/lib/client/judge-api";
+import { deleteEntry, fetchDetail, updateSubmission, vote } from "@/lib/client/judge-api";
 import { RANK_LABEL, type SubmissionDetail, type WinnerRank } from "@/lib/judge-types";
 
 export function Detail({ id }: { id: string }) {
@@ -181,6 +181,24 @@ export function Detail({ id }: { id: string }) {
         className={`tap mt-2 rounded-xl border-3 border-ink font-semibold ${item.hidden ? "bg-mint-100" : "bg-white text-[#b3124e]"}`}
       >
         {item.hidden ? "Unhide (show in feed & leaderboard)" : "Hide (duplicate / inappropriate)"}
+      </button>
+      <button
+        type="button"
+        disabled={saving}
+        onClick={async () => {
+          if (!confirm(`Permanently delete #${item.code} and its photo? This can't be undone.`)) return;
+          setSaving(true);
+          try {
+            await deleteEntry(id);
+            router.replace("/judge");
+          } catch (e) {
+            setError(e instanceof Error ? e.message : "Couldn't delete.");
+            setSaving(false);
+          }
+        }}
+        className="tap self-center px-2 font-semibold text-[#b3124e] underline"
+      >
+        Delete entry (test photos)
       </button>
     </>
   );

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "reset-test-data": "node --env-file=.env.local scripts/reset-test-data.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

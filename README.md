@@ -27,9 +27,20 @@ npm run dev
 | `/judge/leaderboard` | Judges | Ranked per category, totals, CSV download. |
 | `/wall?key=<JUDGE_PASSCODE>` | HQ tent TV | Full-screen slideshow (category + team name only). Click for full screen. |
 
+## Open early, then clear test photos
+
+The site opens on 2026-09-27 (`opensAt` in `config/event.ts`) so the team can try it for real, and closes after the event. With `SUBMISSIONS_OPEN=true` in Vercel there is nothing else to switch on.
+
+Clearing test entries, all from a phone:
+- **One entry:** Judges → open it → **Delete entry (test photos)**.
+- **Everything:** Judges → Leaderboard → **Start fresh** → type `DELETE`. Removes every entry, photo, score and hazard report for the year. Volunteers' "Mine" lists clear themselves.
+- From a computer instead: `npm run reset-test-data` (dry run), then `npm run reset-test-data -- --yes`.
+
+`SUBMISSIONS_OPEN=always` (open regardless of dates, shows a striped TEST MODE banner) is still available for testing outside the window.
+
 ## Event-day runbook
 
-- **Before:** set `SUBMISSIONS_OPEN=true` in Vercel, check dates in `config/event.ts`, print QR codes pointing at the site.
+- **Before:** check `SUBMISSIONS_OPEN=true` in Vercel, clear test photos (Start fresh), print QR codes pointing at the site.
 - **Judges:** share the site + `/judge` and the passcode. Each judge enters their own name; scores are kept per judge.
 - **Kill switch:** set `SUBMISSIONS_OPEN=false` in Vercel and redeploy, or flip `submissionsOpen` in `config/event.ts` and push.
 - **Hazard reports** go by text to `SAFETY_LEAD_PHONE` and are also logged in the `hazards` table (Supabase → Table Editor).
