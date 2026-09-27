@@ -52,12 +52,12 @@ export function MineList() {
             : `No signal. ${waiting} ${waiting === 1 ? "entry is" : "entries are"} saved and will send automatically.`}
         </p>
       )}
-      {rows.some((r) => r.status === "sent") && <ShareAlbum />}
       <ul className="flex flex-col gap-3">
         {rows.map((row) => (
           <MineRow key={row.id} row={row} online={online} />
         ))}
       </ul>
+      {rows.some((r) => r.status === "sent") && <ShareAlbum />}
     </>
   );
 }
