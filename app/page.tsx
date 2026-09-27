@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { event, isSubmissionsOpen } from "@/config/event";
 import { HazardLink } from "./hazard-link";
-import { IntroSplash } from "./intro-splash";
 import { MineLink } from "./mine-link";
 import { SubmitForm } from "./submit-form";
 
@@ -13,7 +12,6 @@ export default function Home() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-4 pb-8">
-      <IntroSplash />
       <header className="flex items-center gap-3">
         <Image
           src="/brand/badge-2026.webp"

@@ -269,20 +269,20 @@ export function SubmitForm() {
           {editingProfile ? (
             <AboutYou profile={profile} errors={errors} onChange={updateProfile} disabled={sending} />
           ) : (
-            <p className="rounded-xl bg-mint-100 px-4 py-3 text-lg">
-              Submitting as <strong>{profile.name}</strong>
-              {profile.teamName && <> · {profile.teamName}</>}{" "}
-              <span className="whitespace-nowrap">
-                ·{" "}
-                <button
-                  type="button"
-                  onClick={() => setEditingProfile(true)}
-                  className="tap -my-3 font-semibold text-grape-700 underline underline-offset-4"
-                >
-                  edit
-                </button>
-              </span>
-            </p>
+            <div className="flex items-center gap-3 rounded-xl bg-mint-100 py-2 pr-2 pl-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-river-900">Submitting as</p>
+                <p className="truncate text-lg leading-tight font-bold">{profile.name}</p>
+                {profile.teamName && <p className="truncate text-sm text-river-900">{profile.teamName}</p>}
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingProfile(true)}
+                className="tap shrink-0 rounded-xl border-2 border-ink bg-white px-4 font-semibold text-grape-700"
+              >
+                Edit
+              </button>
+            </div>
           )}
 
           {formError && (

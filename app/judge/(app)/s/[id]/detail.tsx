@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { getCategory } from "@/config/event";
 import { deleteEntry, fetchDetail, updateSubmission, vote } from "@/lib/client/judge-api";
-import { RANK_LABEL, type SubmissionDetail, type WinnerRank } from "@/lib/judge-types";
+import { formatPhone, RANK_LABEL, type SubmissionDetail, type WinnerRank } from "@/lib/judge-types";
 
 export function Detail({ id }: { id: string }) {
   const router = useRouter();
@@ -36,7 +36,7 @@ export function Detail({ id }: { id: string }) {
     setSaving(true);
     try {
       await fn();
-      await load(); // pick up new average / contact info
+      await load(); // pick up the new average
     } catch (e) {
       setItem(before);
       setError(e instanceof Error ? e.message : "Couldn't save.");
@@ -83,6 +83,8 @@ export function Detail({ id }: { id: string }) {
           {error}
         </p>
       )}
+
+      {item.contact && <Contact detail={item} />}
 
       {/* Scoring */}
       <section className="outlined rounded-2xl bg-white p-3">
@@ -167,12 +169,8 @@ export function Detail({ id }: { id: string }) {
             Remove award
           </button>
         )}
-        <p className="text-sm text-river-900">
-          Awarding a place takes it from whoever had it in this category. Contact info unlocks once awarded.
-        </p>
+        <p className="text-sm text-river-900">Awarding a place takes it from whoever had it in this category.</p>
       </section>
-
-      {item.contact && <Contact detail={item} />}
 
       <button
         type="button"
@@ -208,8 +206,9 @@ function Contact({ detail }: { detail: SubmissionDetail }) {
   const c = detail.contact!;
   return (
     <section className="outlined rounded-2xl bg-mint-100 p-3">
-      <h2 className="font-display text-2xl tracking-wide">Contact the winner</h2>
-      <PersonLinks label={detail.isMinor ? "Entrant (minor)" : "Name"} name={c.name} phone={c.phone} />
+      <h2 className="font-display text-2xl tracking-wide">Submitted by</h2>
+      <PersonLinks label={detail.isMinor ? "Entrant (minor)" : "Entrant"} name={c.name} phone={c.phone} />
+      {detail.teamName && <p className="text-base text-river-900">Team: {detail.teamName}</p>}
       {detail.isMinor && <PersonLinks label="Parent/guardian" name={c.guardianName} phone={c.guardianPhone} />}
       {!c.phone && <p className="text-base">Contact info has been purged.</p>}
     </section>
@@ -223,14 +222,23 @@ function PersonLinks({ label, name, phone }: { label: string; name: string | nul
       <p className="text-base text-river-900">{label}</p>
       <p className="text-xl font-semibold">{name}</p>
       {phone && (
-        <div className="mt-1 flex gap-2">
-          <a href={`tel:${phone}`} className="outlined tap flex items-center rounded-xl bg-white px-4 font-semibold">
-            📞 Call {phone}
-          </a>
-          <a href={`sms:${phone}`} className="outlined tap flex items-center rounded-xl bg-white px-4 font-semibold">
-            💬 Text
-          </a>
-        </div>
+        <>
+          <p className="text-lg">{formatPhone(phone)}</p>
+          <div className="mt-1 grid grid-cols-2 gap-2">
+            <a
+              href={`tel:${phone}`}
+              className="outlined tap flex items-center justify-center rounded-xl bg-white px-4 font-semibold"
+            >
+              📞 Call
+            </a>
+            <a
+              href={`sms:${phone}`}
+              className="outlined tap flex items-center justify-center rounded-xl bg-white px-4 font-semibold"
+            >
+              💬 Text
+            </a>
+          </div>
+        </>
       )}
     </div>
   );
