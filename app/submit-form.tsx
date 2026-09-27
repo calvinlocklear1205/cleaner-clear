@@ -1,22 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { event, getCategory, zonesEnabled } from "@/config/event";
 import { compressImage } from "@/lib/client/compress";
 import { uuid } from "@/lib/client/ids";
 import { EMPTY_PROFILE, getDeviceId, loadProfile, saveProfile, type Profile } from "@/lib/client/storage";
-import { SubmitError, uploadSubmission, type UploadStage } from "@/lib/client/upload";
+import { enqueue, retryNow } from "@/lib/client/queue";
+import { useQueueEntry } from "@/lib/client/use-queue";
 import { NOTE_MAX, validateSubmission, type FieldErrors, type SubmissionInput } from "@/lib/submission";
 
-type Photo = { blob: Blob; url: string };
+type Photo = { blob: Blob; thumb: Blob | null; url: string };
 type Geo = { status: "pending" | "ok" | "unavailable"; lat?: number; lng?: number };
-type Phase = { kind: "form" } | { kind: "sending"; stage: UploadStage } | { kind: "done"; code: string };
-
-const STAGE_LABEL: Record<UploadStage, string> = {
-  starting: "Bagging it…",
-  uploading: "Uploading photo…",
-  finishing: "Almost there…",
-};
+type Phase = { kind: "form" } | { kind: "saving" } | { kind: "done"; id: string };
 
 export function SubmitForm() {
   // One id per entry; retries reuse it so the server never creates duplicates.
@@ -51,7 +47,7 @@ export function SubmitForm() {
   useEffect(() => () => void (photo && URL.revokeObjectURL(photo.url)), [photo]);
 
   const category = getCategory(categoryId);
-  const sending = phase.kind === "sending";
+  const sending = phase.kind === "saving";
 
   async function onPhotoPicked(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -61,7 +57,9 @@ export function SubmitForm() {
     setFormError("");
     try {
       const blob = await compressImage(file);
-      setPhoto({ blob, url: URL.createObjectURL(blob) });
+      // Small copy for the "My submissions" list; not worth failing over.
+      const thumb = await compressImage(blob, { maxEdge: 320, quality: 0.6, maxBytes: 40_000 }).catch(() => null);
+      setPhoto({ blob, thumb, url: URL.createObjectURL(blob) });
       setErrors((prev) => ({ ...prev, id: undefined }));
       locate(setGeo); // refresh position for this find
     } catch (err) {
@@ -111,21 +109,14 @@ export function SubmitForm() {
     setErrors({});
     saveProfile(profile);
 
+    // Save on the phone first; the queue uploads it (now, or when signal returns).
+    setPhase({ kind: "saving" });
     try {
-      const { code } = await uploadSubmission(result.value, photo.blob, (stage) =>
-        setPhase({ kind: "sending", stage }),
-      );
-      setPhase({ kind: "done", code });
-    } catch (err) {
+      await enqueue(result.value, photo.blob, photo.thumb);
+      setPhase({ kind: "done", id: result.value.id });
+    } catch {
       setPhase({ kind: "form" });
-      if (err instanceof SubmitError && err.field) {
-        setErrors({ [err.field]: err.message });
-        if (PROFILE_FIELDS.has(err.field)) setEditingProfile(true);
-        scrollToError();
-      } else {
-        const msg = err instanceof Error ? err.message : "Something went wrong.";
-        setFormError(`${msg} Tap “Send it” to try again — you won't get a duplicate.`);
-      }
+      setFormError("Couldn't save your entry on this phone. Please try again.");
     }
   }
 
@@ -159,7 +150,7 @@ export function SubmitForm() {
         tabIndex={-1}
       />
       {phase.kind === "done" ? (
-        <Confirmation code={phase.code} onSnapAnother={snapAnother} />
+        <Confirmation id={phase.id} onSnapAnother={snapAnother} />
       ) : (
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
           {/* 1–2. Photo */}
@@ -303,7 +294,7 @@ export function SubmitForm() {
             disabled={sending || processing}
             className="outlined tap sticky bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] rounded-2xl bg-river-700 px-6 py-4 font-display text-4xl tracking-wide text-white active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:opacity-80"
           >
-            {sending ? STAGE_LABEL[phase.stage] : "Send it →"}
+            {sending ? "Bagging it…" : "Send it →"}
           </button>
 
           {editingProfile && <p className="-mt-3 text-center text-base text-river-900">We only contact winners.</p>}
@@ -531,15 +522,47 @@ function Toggle({
   );
 }
 
-function Confirmation({ code, onSnapAnother }: { code: string; onSnapAnother: () => void }) {
+function Confirmation({ id, onSnapAnother }: { id: string; onSnapAnother: () => void }) {
+  const entry = useQueueEntry(id);
+  const status = entry?.status ?? "queued";
+
   return (
     <section className="flex flex-col items-center gap-6 py-6 text-center" aria-live="polite">
-      <p className="font-display text-4xl tracking-wide text-river-700">Sent ✓</p>
-      <div className="outlined w-full rounded-3xl bg-white px-6 py-8">
-        <p className="text-lg font-semibold text-river-900">Your code</p>
-        <p className="font-display text-8xl leading-none tracking-wider text-grape-700">#{code}</p>
-      </div>
-      <p className="text-xl font-semibold">Show this at the prize tent if you win.</p>
+      {status === "sent" && entry?.code ? (
+        <>
+          <p className="font-display text-4xl tracking-wide text-river-700">Sent ✓</p>
+          <div className="outlined w-full rounded-3xl bg-white px-6 py-8">
+            <p className="text-lg font-semibold text-river-900">Your code</p>
+            <p className="font-display text-8xl leading-none tracking-wider text-grape-700">#{entry.code}</p>
+          </div>
+          <p className="text-xl font-semibold">Show this at the prize tent if you win.</p>
+        </>
+      ) : status === "failed" ? (
+        <div className="outlined w-full rounded-3xl bg-white px-6 py-8">
+          <p className="font-display text-4xl tracking-wide text-[#b3124e]">Didn&apos;t go through</p>
+          <p className="mt-2 text-lg">{entry?.error}</p>
+          <button
+            type="button"
+            onClick={() => void retryNow(id)}
+            className="outlined tap mt-4 rounded-xl bg-white px-5 font-semibold"
+          >
+            Try again
+          </button>
+        </div>
+      ) : (
+        <div className="outlined w-full rounded-3xl bg-white px-6 py-8">
+          <p className="font-display text-4xl tracking-wide text-grabber-700">
+            {status === "uploading" ? "Uploading…" : "Saved — sending soon"}
+          </p>
+          <p className="mt-2 text-lg">
+            {status === "uploading"
+              ? "Hang tight, this usually takes a few seconds."
+              : "It's safe on your phone and will send by itself when you have signal."}
+          </p>
+          <p className="mt-2 text-base text-river-900">Your prize code shows up here once it&apos;s sent.</p>
+        </div>
+      )}
+
       <button
         type="button"
         onClick={onSnapAnother}
@@ -547,6 +570,9 @@ function Confirmation({ code, onSnapAnother }: { code: string; onSnapAnother: ()
       >
         📸 Snap another
       </button>
+      <Link href="/mine" className="tap flex items-center font-semibold text-grape-700 underline underline-offset-4">
+        See all my submissions
+      </Link>
     </section>
   );
 }

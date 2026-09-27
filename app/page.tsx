@@ -1,5 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import { event, isSubmissionsOpen } from "@/config/event";
+import { MineLink } from "./mine-link";
 import { SubmitForm } from "./submit-form";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +28,7 @@ export default function Home() {
             <p className="text-base text-river-900">{event.name}</p>
           </div>
         )}
+        {open && <MineLink />}
       </header>
 
       {open ? <SubmitForm /> : <Closed />}
@@ -41,6 +44,9 @@ function Closed() {
       </h1>
       <p className="outlined rounded-2xl bg-mint-100 px-5 py-4 text-xl font-semibold">Thanks for hauling! 🗑️💚</p>
       <p className="text-lg text-river-900">{event.name}</p>
+      <Link href="/mine" className="tap flex items-center font-semibold text-grape-700 underline underline-offset-4">
+        See my submissions and codes
+      </Link>
     </section>
   );
 }

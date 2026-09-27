@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Inter, Kaushan_Script } from "next/font/google";
 import { event } from "@/config/event";
+import { QueueRunner } from "./queue-runner";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -23,7 +24,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} ${bebas.variable} ${kaushan.variable} antialiased`}>
-      <body className="flex flex-col">{children}</body>
+      <body className="flex flex-col">
+        <QueueRunner />
+        {children}
+      </body>
     </html>
   );
 }
