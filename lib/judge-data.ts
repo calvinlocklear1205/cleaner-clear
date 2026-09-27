@@ -151,3 +151,51 @@ export async function findByCode(raw: string): Promise<string | null> {
   if (error) throw error;
   return data?.id ?? null;
 }
+
+/**
+ * Permanently deletes submissions (votes cascade) and their photo files.
+ * `ids` = specific entries; omitted = every entry this year plus hazards
+ * ("start fresh" after testing).
+ */
+export async function deleteSubmissions(ids?: string[]): Promise<number> {
+  const db = supabaseAdmin();
+  let query = db.from("submissions").select("id, photo_path").eq("event_year", event.year);
+  if (ids) query = query.in("id", ids);
+  const { data, error } = await query;
+  if (error) throw error;
+
+  const bucket = db.storage.from(SUBMISSIONS_BUCKET);
+  const paths = data.flatMap((r) => [r.photo_path, thumbPath(r.id)]);
+  if (!ids) {
+    // Also sweep orphans (e.g. uploads whose entry never completed) and hazard photos.
+    for (const prefix of [`${event.year}`, `${event.year}/hazards`]) {
+      for (let offset = 0; ; offset += 1000) {
+        const { data: files, error: listError } = await bucket.list(prefix, { limit: 1000, offset });
+        if (listError) throw listError;
+        paths.push(...files.filter((f) => f.id).map((f) => `${prefix}/${f.name}`));
+        if (files.length < 1000) break;
+      }
+    }
+  }
+  const unique = [...new Set(paths)];
+  for (let i = 0; i < unique.length; i += 100) {
+    const { error: removeError } = await bucket.remove(unique.slice(i, i + 100));
+    if (removeError) throw removeError;
+  }
+
+  if (data.length) {
+    const { error: deleteError } = await db
+      .from("submissions")
+      .delete()
+      .in(
+        "id",
+        data.map((r) => r.id),
+      );
+    if (deleteError) throw deleteError;
+  }
+  if (!ids) {
+    const { error: hazardError } = await db.from("hazards").delete().eq("event_year", event.year);
+    if (hazardError) throw hazardError;
+  }
+  return data.length;
+}

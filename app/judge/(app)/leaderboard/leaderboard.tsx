@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { event } from "@/config/event";
+import { deleteEverything } from "@/lib/client/judge-api";
 import { useJudgeFeed } from "@/lib/client/use-judge-feed";
 import { compareByScore, RANK_LABEL, type FeedItem } from "@/lib/judge-types";
 
 const SHOW_TOP = 10;
 
 export function Leaderboard() {
-  const { items, error } = useJudgeFeed();
+  const { items, error, refresh } = useJudgeFeed();
   if (!items) return <p className="text-lg text-river-900">{error || "Loading…"}</p>;
 
   const eligible = items.filter((i) => !i.hidden);
@@ -60,7 +61,42 @@ export function Leaderboard() {
           </section>
         );
       })}
+      <StartFresh count={items.length} onDone={() => void refresh()} />
     </>
+  );
+}
+
+/** Wipe every entry after team testing. Typed confirmation, since it can't be undone. */
+function StartFresh({ count, onDone }: { count: number; onDone: () => void }) {
+  async function onClick() {
+    const typed = prompt(
+      `Delete ALL ${count} entries, their photos, scores and hazard reports?\n\nUse this to clear test photos before the event. It can't be undone.\n\nType DELETE to confirm.`,
+    );
+    if (typed?.trim() !== "DELETE") return;
+    try {
+      const { deleted } = await deleteEverything();
+      alert(`Done — deleted ${deleted} entries.`);
+      onDone();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Couldn't delete.");
+    }
+  }
+  return (
+    <section className="mt-6 rounded-2xl border-3 border-dashed border-[#b3124e] p-3">
+      <h2 className="font-display text-2xl tracking-wide text-[#b3124e]">Start fresh</h2>
+      <p className="text-base">
+        Deletes every entry, photo, score and hazard report. For clearing test photos before the event. To remove just
+        one entry, open it and tap &ldquo;Delete entry&rdquo;.
+      </p>
+      <button
+        type="button"
+        onClick={() => void onClick()}
+        disabled={count === 0}
+        className="tap mt-2 rounded-xl border-3 border-[#b3124e] bg-white px-4 font-semibold text-[#b3124e] disabled:opacity-50"
+      >
+        Delete all {count} entries…
+      </button>
+    </section>
   );
 }
 

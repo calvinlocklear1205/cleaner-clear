@@ -3,8 +3,9 @@
  * no admin UI by design (see SPEC.md "Non-goals").
  *
  * Notes:
- *   - opensAt / closesAt are Denver time. The window is padded on both sides
- *     of the official 9am–12pm so early birds and stragglers can still submit.
+ *   - opensAt / closesAt are Denver time. The site opened early so the team
+ *     can try it for real (judges delete test entries from /judge); it closes
+ *     a few hours after the official 9am–12pm.
  *   - zones: leave empty to skip zone entirely (GPS only). Add labels, e.g.
  *     ["A", "B", "C"], to show a manual zone picker when GPS is unavailable.
  *   - categories: ids are stored in the DB — don't rename an id once
@@ -51,8 +52,8 @@ export const event: EventConfig = {
   name: "Cleaner Clear Photo Contest",
   cleanup: "7th Annual Clear Creek Cleanup",
   year: 2026,
-  // Official hours: Sat Oct 3, 9am–12pm at Engineer Lake Parking Lot.
-  opensAt: "2026-10-03T07:00:00-06:00",
+  // Event: Sat Oct 3, 9am–12pm at Engineer Lake Parking Lot. Open early for team testing.
+  opensAt: "2026-09-27T00:00:00-06:00",
   closesAt: "2026-10-03T15:00:00-06:00",
   submissionsOpen: true,
   uploadGraceMinutes: 120,
