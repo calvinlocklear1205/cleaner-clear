@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { event, isSubmissionsOpen } from "@/config/event";
 import { HazardLink } from "./hazard-link";
+import { IntroSplash } from "./intro-splash";
 import { MineLink } from "./mine-link";
 import { SubmitForm } from "./submit-form";
 
@@ -12,6 +13,7 @@ export default function Home() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-4 pb-8">
+      <IntroSplash />
       <header className="flex items-center gap-3">
         <Image
           src="/brand/badge-2026.webp"
@@ -22,15 +24,21 @@ export default function Home() {
           className={open ? "size-18 shrink-0" : "mx-auto h-auto w-72"}
         />
         {open && (
-          <div>
-            <h1 className="font-display text-3xl leading-none tracking-wide text-balance text-grape-700">
-              Grab it. Snap it. Send it.
-            </h1>
-            <p className="text-base text-river-900">{event.name}</p>
-          </div>
+          // Deliberate two-line lockup ("Cleaner Clear" / "Photo Contest") so it never wraps awkwardly.
+          <h1 className="leading-none">
+            <span className="block font-display text-3xl tracking-wide whitespace-nowrap text-grape-700">
+              Cleaner Clear
+            </span>
+            <span className="block text-base font-semibold whitespace-nowrap text-river-900">Photo Contest</span>
+          </h1>
         )}
         {open && <MineLink />}
       </header>
+      {open && (
+        <p className="-mt-2 text-center font-display text-[clamp(1.6rem,8.5vw,2.4rem)] leading-none tracking-wide whitespace-nowrap text-grape-700">
+          Grab it. Snap it. Send it.
+        </p>
+      )}
 
       {open ? <SubmitForm /> : <Closed />}
       <HazardLink />

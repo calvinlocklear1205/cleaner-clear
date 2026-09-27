@@ -97,7 +97,7 @@ export function HazardForm({ phone }: { phone: string | null }) {
         <a
           href={smsHref}
           onClick={logHazard}
-          className="outlined tap flex items-center justify-center rounded-2xl bg-fish-500 px-6 py-4 text-center font-display text-4xl tracking-wide"
+          className="outlined tap flex items-center justify-center rounded-2xl bg-fish-500 px-4 py-4 text-center font-display text-[clamp(1.5rem,7.6vw,2.25rem)] tracking-wide whitespace-nowrap"
         >
           💬 Text the safety lead
         </a>

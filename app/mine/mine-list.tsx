@@ -101,9 +101,16 @@ function StatusPill({ row, online }: { row: Row; online: boolean }) {
       return <Pill className="bg-grabber-500 text-white">Uploading…</Pill>;
     case "queued":
       return (
-        <Pill className="bg-mint-200 text-ink">
-          {online && row.error ? "Retrying…" : online ? "Queued" : "Waiting for signal"}
-        </Pill>
+        <>
+          <Pill className="bg-mint-200 text-ink">
+            {online && row.error ? "Retrying…" : online ? "Queued" : "Waiting for signal"}
+          </Pill>
+          {online && row.error && (row.entry?.attempts ?? 0) >= 3 && (
+            <p className="mt-1 text-sm text-river-900">
+              Still trying. Last error: {row.error} Nothing is lost; it&apos;s saved on your phone.
+            </p>
+          )}
+        </>
       );
     case "lost":
       return (

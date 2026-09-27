@@ -48,6 +48,28 @@ body {
     env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
+/*
+ * No orphans: never leave one or two words alone on a last line. All text in
+ * this app is short, so balance it (evens out line lengths; Safari 17.5+,
+ * Chrome 114+). "pretty" isn't enough: it only prevents one-word last lines.
+ */
+@layer base {
+  h1,
+  h2,
+  h3,
+  legend,
+  p,
+  li,
+  dt,
+  dd,
+  label,
+  a,
+  button,
+  span {
+    text-wrap: balance;
+  }
+}
+
 @layer components {
   /* Thick cartoon outline + offset shadow, like the badge artwork. */
   .outlined {
@@ -68,5 +90,78 @@ body {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* ---- Intro splash (app/intro-splash.tsx) ---- */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--color-mint-200);
+  pointer-events: auto; /* swallow taps during the ~2s intro so nothing underneath gets pressed */
+  animation: intro-backdrop 2.3s ease-in forwards;
+}
+.intro img {
+  width: min(80vw, 70vh, 460px);
+  height: auto;
+  animation: intro-roll 2.3s forwards;
+}
+html.intro-seen .intro {
+  display: none;
+}
+/* Pop in, hold ~1s, spin up in place, then roll off to the right. */
+@keyframes intro-roll {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.2, 1.4, 0.4, 1);
+  }
+  12% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  52% {
+    transform: translateX(0) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 1);
+  }
+  72% {
+    transform: translateX(0) rotate(720deg);
+    animation-timing-function: cubic-bezier(0.6, 0, 1, 0.8);
+  }
+  100% {
+    transform: translateX(140vw) rotate(1800deg);
+  }
+}
+@keyframes intro-backdrop {
+  0%,
+  75% {
+    background-color: var(--color-mint-200);
+  }
+  100% {
+    background-color: transparent;
+    visibility: hidden;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro {
+    animation: intro-fade 0.9s ease-in forwards;
+  }
+  .intro img {
+    animation: none;
+  }
+  @keyframes intro-fade {
+    0%,
+    60% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 }

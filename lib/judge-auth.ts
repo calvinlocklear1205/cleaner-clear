@@ -14,7 +14,7 @@ type Session = { name: string; iat: number };
 const enc = new TextEncoder();
 
 function passcode(): string {
-  const p = process.env.JUDGE_PASSCODE;
+  const p = process.env.JUDGE_PASSCODE?.trim();
   if (!p) throw new Error("Missing required environment variable: JUDGE_PASSCODE");
   return p;
 }
@@ -69,7 +69,7 @@ export async function readSessionToken(token: string | undefined): Promise<strin
 /** Constant-time passcode comparison (compares SHA-256 digests). */
 export async function passcodeMatches(input: string): Promise<boolean> {
   const [a, b] = await Promise.all([
-    crypto.subtle.digest("SHA-256", enc.encode(input)),
+    crypto.subtle.digest("SHA-256", enc.encode(input.trim())),
     crypto.subtle.digest("SHA-256", enc.encode(passcode())),
   ]);
   const x = new Uint8Array(a);
