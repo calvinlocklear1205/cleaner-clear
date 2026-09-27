@@ -7,6 +7,8 @@ export type FeedItem = {
   code: string;
   categoryId: string;
   createdAt: string;
+  /** Submitter's name (judges only). */
+  name: string | null;
   weightLbs: number | null;
   teamName: string | null;
   hidden: boolean;
@@ -27,7 +29,7 @@ export type SubmissionDetail = FeedItem & {
   lng: number | null;
   isMinor: boolean;
   photoConsent: boolean;
-  /** Only present for winners / runners-up. */
+  /** Submitter contact (judges only; null after the post-event purge). */
   contact: {
     name: string | null;
     phone: string | null;
@@ -35,6 +37,12 @@ export type SubmissionDetail = FeedItem & {
     guardianPhone: string | null;
   } | null;
 };
+
+/** "3035551234" / "+13035551234" → "(303) 555-1234"; anything else unchanged. */
+export function formatPhone(phone: string): string {
+  const d = phone.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "");
+  return d.length === 10 ? `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}` : phone;
+}
 
 export const RANK_LABEL: Record<WinnerRank, string> = { 1: "🥇 Winner", 2: "🥈 2nd", 3: "🥉 3rd" };
 

@@ -7,15 +7,17 @@ import { SUBMISSIONS_BUCKET, supabaseAdmin } from "@/lib/supabase/server";
 /** Signed photo URLs last long enough that polling can keep reusing them. */
 const URL_TTL_S = 6 * 60 * 60;
 
-// Never select contact columns here; detail() adds them only for winners.
+// Judges see who submitted each entry (name here; phone numbers in the detail
+// view). None of this ever reaches the public pages or the wall.
 const FEED_COLUMNS =
-  "id, code, category_id, created_at, weight_lbs, team_name, hidden, winner_rank, photo_path, votes(judge_name, score)";
+  "id, code, category_id, created_at, name, weight_lbs, team_name, hidden, winner_rank, photo_path, votes(judge_name, score)";
 
 type Row = {
   id: string;
   code: string;
   category_id: string;
   created_at: string;
+  name: string | null;
   weight_lbs: number | string | null;
   team_name: string | null;
   hidden: boolean;
@@ -32,6 +34,7 @@ function toItem(r: Row, judge: string, thumbUrl: string | null): FeedItem {
     code: r.code,
     categoryId: r.category_id,
     createdAt: r.created_at,
+    name: r.name,
     weightLbs: r.weight_lbs === null ? null : Number(r.weight_lbs),
     teamName: r.team_name,
     hidden: r.hidden,
@@ -113,17 +116,18 @@ export async function loadDetail(id: string, judge: string): Promise<SubmissionD
     db.storage.from(SUBMISSIONS_BUCKET).createSignedUrl(r.photo_path, URL_TTL_S),
   ]);
 
-  // Contact info is released only once a judge marks this entry a winner/runner-up.
-  let contact: SubmissionDetail["contact"] = null;
-  if (r.winner_rank !== null) {
-    const { data: c, error: cErr } = await db
-      .from("submissions")
-      .select("name, phone, guardian_name, guardian_phone")
-      .eq("id", id)
-      .single();
-    if (cErr) throw cErr;
-    contact = { name: c.name, phone: c.phone, guardianName: c.guardian_name, guardianPhone: c.guardian_phone };
-  }
+  const { data: c, error: cErr } = await db
+    .from("submissions")
+    .select("name, phone, guardian_name, guardian_phone")
+    .eq("id", id)
+    .single();
+  if (cErr) throw cErr;
+  const contact: SubmissionDetail["contact"] = {
+    name: c.name,
+    phone: c.phone,
+    guardianName: c.guardian_name,
+    guardianPhone: c.guardian_phone,
+  };
 
   return {
     ...toItem(r, judge, urls.get(r.id) ?? null),

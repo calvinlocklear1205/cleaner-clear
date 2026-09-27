@@ -126,6 +126,7 @@ function Tile({ item, showCategory }: { item: FeedItem; showCategory: boolean })
         >
           {item.myScore ? `★${item.myScore}` : "—"}
         </span>
+        {item.name && <p className="truncate px-2 pt-1.5 text-sm font-bold">{item.name}</p>}
         <div className="flex flex-wrap items-center gap-x-2 px-2 py-1.5 text-sm font-semibold">
           {showCategory && <span aria-label={category?.label}>{category?.emoji}</span>}
           {item.weightLbs !== null && <span>{item.weightLbs} lbs</span>}
