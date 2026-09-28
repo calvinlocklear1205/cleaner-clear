@@ -33,7 +33,7 @@ npm run dev
 The site opens on 2026-09-27 (`opensAt` in `config/event.ts`) so the team can try it for real, and closes after the event. With `SUBMISSIONS_OPEN=true` in Vercel there is nothing else to switch on.
 
 Clearing test entries, all from a phone:
-- **One entry:** Judges → open it → **Delete entry (test photos)**.
+- **One entry:** Judges → open it → **Delete entry**.
 - **Everything:** Judges → Leaderboard → **Start fresh** → type `DELETE`. Removes every entry, photo, score and hazard report for the year. Volunteers' "Mine" lists clear themselves.
 - From a computer instead: `npm run reset-test-data` (dry run), then `npm run reset-test-data -- --yes`.
 

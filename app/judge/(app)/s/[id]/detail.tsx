@@ -196,7 +196,7 @@ export function Detail({ id }: { id: string }) {
         }}
         className="tap self-center px-2 font-semibold text-[#b3124e] underline"
       >
-        Delete entry (test photos)
+        Delete entry
       </button>
     </>
   );
