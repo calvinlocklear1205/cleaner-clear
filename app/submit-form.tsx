@@ -190,7 +190,7 @@ export function SubmitForm() {
           {/* 3. Category */}
           <fieldset data-error={errors.categoryId ? "" : undefined}>
             <legend className="mb-3 font-display text-3xl tracking-wide text-grape-700">Pick a category</legend>
-            <div className="grid gap-3">
+            <div className="grid auto-rows-fr gap-3">
               {event.categories.map((c) => {
                 const selected = c.id === categoryId;
                 return (
