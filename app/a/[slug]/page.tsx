@@ -113,9 +113,10 @@ export default async function AlbumPage({ params }: PageProps<"/a/[slug]">) {
 
 function Stats({ album }: { album: PublicAlbum }) {
   const { photos, pounds, categories, minutes } = album.stats;
+  const wins = album.photos.filter((p) => p.winnerRank !== null).length;
   const tiles: [string, string, string][] = [
     ["📸", String(photos), photos === 1 ? "find" : "finds"],
-    ["🏋️", pounds > 0 ? `${pounds}` : "—", "lbs weighed"],
+    pounds > 0 ? ["🏋️", String(pounds), "lbs weighed"] : ["🏅", String(wins), wins === 1 ? "award" : "awards"],
     ["🗂️", String(categories), categories === 1 ? "category" : "categories"],
     ["⏱️", minutes === null ? "—" : formatDuration(minutes), "on the river"],
   ];
