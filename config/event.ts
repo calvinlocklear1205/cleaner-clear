@@ -58,13 +58,15 @@ export const event: EventConfig = {
   submissionsOpen: true,
   uploadGraceMinutes: 120,
   zones: [],
-  // TODO: prizes and runners-up per category are still TBD.
+  // Final 2026 categories. Prizes and runners-up are still TBD.
   categories: [
-    { id: "weirdest", label: "Weirdest Find", emoji: "🤯", blurb: "The 'how did THIS get here?' award" },
-    { id: "heaviest", label: "Heaviest Haul", emoji: "🏋️", blurb: "Weigh it at a scale station", requiresWeight: true },
-    { id: "treasure", label: "Trash to Treasure", emoji: "♻️", blurb: "Something that deserves a second life" },
-    { id: "vintage", label: "Time Capsule", emoji: "⏳", blurb: "Oldest-looking item" },
-    { id: "tiniest", label: "Tiniest Trash", emoji: "🔍", blurb: "Smallest recognizable object" },
+    { id: "reusable", label: "Totally Reusable", emoji: "♻️", blurb: "Still works, still good. Give it a second life." },
+    { id: "outfit", label: "Full Outfit", emoji: "👕", blurb: "Enough found clothes to dress a whole person" },
+    { id: "grossest", label: "Grossest Find", emoji: "🤢", blurb: "Hold your breath and snap it" },
+    { id: "beauty", label: "Beauty Contest", emoji: "👑", blurb: "Wear what you found and strut it" },
+    { id: "historic", label: "Time Capsule", emoji: "⏳", blurb: "The oldest, most historic thing you dug up" },
+    { id: "before-after", label: "Before & After", emoji: "✨", blurb: "Show off a spot you beautified. Collages welcome!" },
+    { id: "art", label: "Trash Art", emoji: "🎨", blurb: "Turn your haul into a masterpiece" },
   ],
 };
 

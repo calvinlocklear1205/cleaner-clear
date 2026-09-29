@@ -21,9 +21,11 @@ export function Leaderboard() {
         <span>
           <strong>{eligible.length}</strong> entries
         </span>
-        <span>
-          <strong>{Math.round(totalLbs * 10) / 10}</strong> lbs weighed
-        </span>
+        {totalLbs > 0 && (
+          <span>
+            <strong>{Math.round(totalLbs * 10) / 10}</strong> lbs weighed
+          </span>
+        )}
         <a
           href="/api/judge/export.csv"
           className="tap ml-auto flex items-center rounded-xl border-3 border-ink bg-mint-100 px-3 font-semibold"
