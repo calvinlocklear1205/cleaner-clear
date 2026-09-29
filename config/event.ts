@@ -67,6 +67,7 @@ export const event: EventConfig = {
     { id: "historic", label: "Time Capsule", emoji: "⏳", blurb: "The oldest, most historic thing you dug up" },
     { id: "before-after", label: "Before & After", emoji: "✨", blurb: "Show off a spot you beautified. Collages welcome!" },
     { id: "art", label: "Trash Art", emoji: "🎨", blurb: "Turn your haul into a masterpiece" },
+    { id: "epic-shot", label: "Epic Cleanup Shot", emoji: "📸", blurb: "Big poses, big views, your crew in action. Surprise us!" },
   ],
 };
 
