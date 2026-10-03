@@ -30,6 +30,7 @@ export function SubmitForm() {
   const [formError, setFormError] = useState("");
   const [phase, setPhase] = useState<Phase>({ kind: "form" });
   const fileInput = useRef<HTMLInputElement>(null);
+  const libraryInput = useRef<HTMLInputElement>(null);
 
   // Restore saved contact info after hydration (localStorage is client-only).
   useEffect(() => {
@@ -120,7 +121,7 @@ export function SubmitForm() {
     }
   }
 
-  function snapAnother() {
+  function snapAnother(source: "camera" | "library" = "camera") {
     setSubmissionId(uuid());
     setPhoto(null);
     setCategoryId("");
@@ -131,8 +132,8 @@ export function SubmitForm() {
     setEditingProfile(false);
     setPhase({ kind: "form" });
     window.scrollTo({ top: 0 });
-    // Open the camera straight away: tap → snap → pick category → send.
-    fileInput.current?.click();
+    // Open the camera (or photo picker) straight away: tap → snap → pick category → send.
+    (source === "library" ? libraryInput : fileInput).current?.click();
   }
 
   return (
@@ -149,8 +150,23 @@ export function SubmitForm() {
         disabled={sending}
         tabIndex={-1}
       />
+      {/* No `capture`, so phones offer the photo library (iOS also offers the camera). */}
+      <input
+        ref={libraryInput}
+        type="file"
+        accept="image/*"
+        onChange={onPhotoPicked}
+        className="sr-only"
+        id="photo-library"
+        disabled={sending}
+        tabIndex={-1}
+      />
       {phase.kind === "done" ? (
-        <Confirmation id={phase.id} onSnapAnother={snapAnother} />
+        <Confirmation
+          id={phase.id}
+          onSnapAnother={() => snapAnother("camera")}
+          onPickAnother={() => snapAnother("library")}
+        />
       ) : (
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
           {/* 1–2. Photo */}
@@ -163,12 +179,20 @@ export function SubmitForm() {
                   alt="Your find"
                   className="outlined max-h-[60vh] w-full rounded-2xl bg-white object-contain"
                 />
-                <label
-                  htmlFor="photo"
-                  className="tap self-center rounded-full px-5 py-3 font-semibold text-grape-700 underline underline-offset-4"
-                >
-                  ↺ Retake
-                </label>
+                <div className="flex flex-wrap justify-center gap-x-2">
+                  <label
+                    htmlFor="photo"
+                    className="tap rounded-full px-4 py-3 font-semibold text-grape-700 underline underline-offset-4"
+                  >
+                    ↺ Retake
+                  </label>
+                  <label
+                    htmlFor="photo-library"
+                    className="tap rounded-full px-4 py-3 font-semibold text-grape-700 underline underline-offset-4"
+                  >
+                    🖼️ Choose a different photo
+                  </label>
+                </div>
               </div>
             ) : (
               <label
@@ -182,6 +206,14 @@ export function SubmitForm() {
                   {processing ? "Squishing photo…" : "Snap your trash"}
                 </span>
                 {!processing && <span className="text-lg font-medium">Tap to open the camera</span>}
+              </label>
+            )}
+            {!photo && !processing && (
+              <label
+                htmlFor="photo-library"
+                className="outlined tap mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-xl font-semibold active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
+              >
+                <span aria-hidden>🖼️</span> Choose from camera roll
               </label>
             )}
             <FieldError message={errors.id} />
@@ -525,7 +557,15 @@ function Toggle({
   );
 }
 
-function Confirmation({ id, onSnapAnother }: { id: string; onSnapAnother: () => void }) {
+function Confirmation({
+  id,
+  onSnapAnother,
+  onPickAnother,
+}: {
+  id: string;
+  onSnapAnother: () => void;
+  onPickAnother: () => void;
+}) {
   const entry = useQueueEntry(id);
   const status = entry?.status ?? "queued";
 
@@ -575,6 +615,13 @@ function Confirmation({ id, onSnapAnother }: { id: string; onSnapAnother: () => 
         className="outlined tap w-full rounded-2xl bg-fish-500 px-6 py-4 font-display text-4xl tracking-wide active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
       >
         📸 Snap another
+      </button>
+      <button
+        type="button"
+        onClick={onPickAnother}
+        className="tap flex items-center font-semibold text-grape-700 underline underline-offset-4"
+      >
+        🖼️ Or choose from camera roll
       </button>
       <Link href="/mine" className="tap flex items-center font-semibold text-grape-700 underline underline-offset-4">
         See all my submissions
